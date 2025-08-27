@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peace Tower Expenses</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        button.success {
+            background: #28a745;
+        }
+
+        button.success:hover {
+            background: #1e7e34;
+        }
+
+        .checkbox-group {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: white;
+        }
+
+        .checkbox-item {
+            margin-bottom: 8px;
+        }
+
+        .checkbox-item input {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Peace Tower Expenses</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('expenses')">Expenses</button>
+            <button class="tab" onclick="showTab('members')">Members</button>
+            <button class="tab" onclick="showTab('payments')">Payment Tracking</button>
+        </div>
+
+        <!-- Expenses Tab -->
+        <div id="expenses-tab" class="tab-content active">
+            <div class="form-section">
+                <h3>Add New Expense</h3>
+                <form id="expense-form">
+                    <div class="form-group">
+                        <label for="expense-title">Title *</label>
+                        <input type="text" id="expense-title" name="title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expense-amount">Amount (₹) *</label>
+                        <input type="number" id="expense-amount" name="amount" required min="0" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expense-paid-by">Paid By *</label>
+                        <select id="expense-paid-by" name="paidBy" required>
+                            <option value="">Select Member</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Split Among</label>
+                        <div id="split-among" class="checkbox-group">
+                            <!-- Members will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expense-category">Category</label>
+                        <select id="expense-category" name="category">
+                            <option value="General">General</option>
+                            <option value="Maintenance">Maintenance</option>
+                            <option value="Security">Security</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Cleaning">Cleaning</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expense-date">Date *</label>
+                        <input type="date" id="expense-date" name="date" required>
+                    </div>
+
+                    <button type="submit">Add Expense</button>
+                </form>
+            </div>
+
+            <div id="expenses-list">
+                <h3>All Expenses</h3>
+                <div class="loading">Loading expenses...</div>
+            </div>
+        </div>
+
+        <!-- Members Tab -->
+        <div id="members-tab" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>Members</h3>
+                <button id="toggle-member-form" class="success">Add Member</button>
+            </div>
+
+            <div id="member-form-section" class="form-section" style="display: none;">
+                <h4>Add New Member</h4>
+                <form id="member-form">
+                    <div class="form-group">
+                        <label for="member-flatno">Flat No *</label>
+                        <input type="text" id="member-flatno" name="flatNo" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="member-name">Name *</label>
+                        <input type="text" id="member-name" name="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="member-contact">Contact *</label>
+                        <input type="text" id="member-contact" name="contact" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="member-email">Email</label>
+                        <input type="email" id="member-email" name="email">
+                    </div>
+
+                    <button type="submit" class="success">Add Member</button>
+                </form>
+            </div>
+
+            <div id="members-list">
+                <div class="loading">Loading members...</div>
+            </div>
+        </div>
+
+        <!-- Payment Tracking Tab -->
+        <div id="payments-tab" class="tab-content">
+            <h3>Payment Tracking</h3>
+            <div id="payments-list">
+                <div class="loading">Loading payment data...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE = 'http://localhost:5000/api';
+        
+        // Global state
+        let members = [];
+        let expenses = [];
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            setTodayDate();
+            loadMembers();
+            loadExpenses();
+            setupEventListeners();
+        });
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Load data if needed
+            if (tabName === 'payments') {
+                loadPayments();
+            }
+        }
+
+        // Set today's date as default
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('expense-date').value = today;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Expense form
+            document.getElementById('expense-form').addEventListener('submit', handleExpenseSubmit);
+            
+            // Member form
+            document.getElementById('member-form').addEventListener('submit', handleMemberSubmit);
+            
+            // Toggle member form
+            document.getElementById('toggle-member-form').addEventListener('click', toggleMemberForm);
+        }
+
+        // API Functions
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(API_BASE + endpoint, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'API call failed');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('API call error:', error);
+                throw error;
+            }
+        }
+
+        // Load members from API
+        async function loadMembers() {
+            try {
+                const response = await apiCall('/members');
+                members = Array.isArray(response) ? response : response.data || [];
+                updateMemberSelects();
+                renderMembersTable();
+            } catch (error) {
+                showError('Failed to load members: ' + error.message);
+            }
+        }
+
+        // Load expenses from API
+        async function loadExpenses() {
+            try {
+                const response = await apiCall('/expenses');
+                expenses = Array.isArray(response) ? response : response.data || [];
+                renderExpensesTable();
+            } catch (error) {
+                showError('Failed to load expenses: ' + error.message);
+            }
+        }
+
+        // Calculate payment summary for each member
+        function calculatePaymentSummary(payments, expenses, members) {
+            const summary = {};
+            
+            // Initialize summary for each member
+            members.forEach(member => {
+                summary[member.flatNo] = {
+                    flatNo: member.flatNo,
+                    name: member.name,
+                    totalPaid: 0,
+                    totalShare: 0,
+                    balance: 0
+                };
+            });
+            
+            // Calculate total paid by each member (from expenses)
+            expenses.forEach(expense => {
+                if (summary[expense.paidBy]) {
+                    summary[expense.paidBy].totalPaid += expense.amount;
+                }
+            });
+            
+            // Calculate total share for each member (from expenses)
+            expenses.forEach(expense => {
+                const sharePerMember = expense.amount / expense.splitAmong.length;
+                expense.splitAmong.forEach(flatNo => {
+                    if (summary[flatNo]) {
+                        summary[flatNo].totalShare += sharePerMember;
+                    }
+                });
+            });
+            
+            // Calculate balance (totalPaid - totalShare)
+            Object.values(summary).forEach(member => {
+                member.balance = member.totalPaid - member.totalShare;
+            });
+            
+            return Object.values(summary);
+        }
+
+        // Load payment tracking data
+        async function loadPayments() {
+            try {
+                // Get payments, expenses, and members to calculate balance
+                const [paymentsResponse, expensesResponse, membersResponse] = await Promise.all([
+                    apiCall('/payments'),
+                    apiCall('/expenses'),
+                    apiCall('/members')
+                ]);
+                
+                const payments = Array.isArray(paymentsResponse) ? paymentsResponse : paymentsResponse.data || [];
+                const expenses = Array.isArray(expensesResponse) ? expensesResponse : expensesResponse.data || [];
+                const members = Array.isArray(membersResponse) ? membersResponse : membersResponse.data || [];
+                
+                const paymentSummary = calculatePaymentSummary(payments, expenses, members);
+                renderPaymentsTable(paymentSummary);
+            } catch (error) {
+                showError('Failed to load payments: ' + error.message);
+            }
+        }
+
+        // Handle expense form submission
+        async function handleExpenseSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const splitAmong = [];
+            
+            // Get selected members for split
+            document.querySelectorAll('#split-among input:checked').forEach(checkbox => {
+                splitAmong.push(checkbox.value);
+            });
+            
+            const expense = {
+                title: formData.get('title'),
+                amount: parseFloat(formData.get('amount')),
+                paidBy: formData.get('paidBy'),
+                splitAmong: splitAmong.length > 0 ? splitAmong : [formData.get('paidBy')],
+                category: formData.get('category'),
+                date: formData.get('date')
+            };
+            
+            try {
+                await apiCall('/expenses', {
+                    method: 'POST',
+                    body: JSON.stringify(expense)
+                });
+                
+                showSuccess('Expense added successfully!');
+                e.target.reset();
+                setTodayDate();
+                updateSplitAmongCheckboxes();
+                loadExpenses();
+            } catch (error) {
+                showError('Failed to add expense: ' + error.message);
+            }
+        }
+
+        // Handle member form submission
+        async function handleMemberSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const member = {
+                flatNo: formData.get('flatNo'),
+                name: formData.get('name'),
+                contact: formData.get('contact'),
+                email: formData.get('email')
+            };
+            
+            try {
+                await apiCall('/members', {
+                    method: 'POST',
+                    body: JSON.stringify(member)
+                });
+                
+                showSuccess('Member added successfully!');
+                e.target.reset();
+                toggleMemberForm();
+                loadMembers();
+            } catch (error) {
+                showError('Failed to add member: ' + error.message);
+            }
+        }
+
+        // Toggle member form visibility
+        function toggleMemberForm() {
+            const formSection = document.getElementById('member-form-section');
+            const button = document.getElementById('toggle-member-form');
+            
+            if (formSection.style.display === 'none') {
+                formSection.style.display = 'block';
+                button.textContent = 'Cancel';
+            } else {
+                formSection.style.display = 'none';
+                button.textContent = 'Add Member';
+                document.getElementById('member-form').reset();
+            }
+        }
+
+        // Update member selects and checkboxes
+        function updateMemberSelects() {
+            const paidBySelect = document.getElementById('expense-paid-by');
+            paidBySelect.innerHTML = '<option value="">Select Member</option>';
+            
+            members.forEach(member => {
+                const option = document.createElement('option');
+                option.value = member.flatNo;
+                option.textContent = `${member.flatNo} - ${member.name}`;
+                paidBySelect.appendChild(option);
+            });
+            
+            updateSplitAmongCheckboxes();
+        }
+
+        // Update split among checkboxes
+        function updateSplitAmongCheckboxes() {
+            const splitAmongDiv = document.getElementById('split-among');
+            splitAmongDiv.innerHTML = '';
+            
+            members.forEach(member => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <input type="checkbox" value="${member.flatNo}" id="split-${member.flatNo}">
+                    <label for="split-${member.flatNo}">${member.flatNo} - ${member.name}</label>
+                `;
+                splitAmongDiv.appendChild(div);
+            });
+        }
+
+        // Render members table
+        function renderMembersTable() {
+            const container = document.getElementById('members-list');
+            
+            if (members.length === 0) {
+                container.innerHTML = '<p>No members found. Add some members to get started.</p>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Flat No</th>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${members.map(member => `
+                        <tr>
+                            <td>${member.flatNo}</td>
+                            <td>${member.name}</td>
+                            <td>${member.contact}</td>
+                            <td>${member.email || '-'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+
+        // Render expenses table
+        function renderExpensesTable() {
+            const container = document.getElementById('expenses-list');
+            
+            if (expenses.length === 0) {
+                container.innerHTML = '<h3>All Expenses</h3><p>No expenses found. Add your first expense above.</p>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Amount (₹)</th>
+                        <th>Paid By</th>
+                        <th>Split Among</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${expenses.map(expense => `
+                        <tr>
+                            <td>${expense.date}</td>
+                            <td>${expense.title}</td>
+                            <td>₹${expense.amount.toFixed(2)}</td>
+                            <td>${expense.paidBy}</td>
+                            <td>${Array.isArray(expense.splitAmong) ? expense.splitAmong.join(', ') : expense.splitAmong}</td>
+                            <td>${expense.category}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            
+            container.innerHTML = '<h3>All Expenses</h3>';
+            container.appendChild(table);
+        }
+
+        // Render payments table
+        function renderPaymentsTable(payments) {
+            const container = document.getElementById('payments-list');
+            
+            if (!payments || payments.length === 0) {
+                container.innerHTML = '<p>No payment data available.</p>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Total Paid</th>
+                        <th>Total Share</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${payments.map(payment => `
+                        <tr>
+                            <td>${payment.flatNo} - ${payment.name}</td>
+                            <td>₹${payment.totalPaid.toFixed(2)}</td>
+                            <td>₹${payment.totalShare.toFixed(2)}</td>
+                            <td style="color: ${payment.balance >= 0 ? 'green' : 'red'}">
+                                ₹${payment.balance.toFixed(2)}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            
+            container.appendChild(table);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            showAlert(message, 'success');
+        }
+
+        // Show error message
+        function showError(message) {
+            showAlert(message, 'error');
+        }
+
+        // Show alert
+        function showAlert(message, type) {
+            // Remove existing alerts
+            document.querySelectorAll('.alert').forEach(alert => alert.remove());
+            
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            
+            document.querySelector('.container').insertBefore(alert, document.querySelector('.tabs'));
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
